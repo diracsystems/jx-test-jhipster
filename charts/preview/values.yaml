@@ -20,3 +20,13 @@ preview:
     repository:
     tag:
     pullPolicy: IfNotPresent
+mysql:
+  fullnameOverride: mysql
+  persistence:
+    enabled: true
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    annotations: {}
+  mysqlUser: root
+  mysqlAllowEmptyPassword: true
+  mysqlDatabase: testjhipster
