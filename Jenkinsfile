@@ -1,6 +1,6 @@
 pipeline {
   agent {
-    label "jenkins-maven"
+     label "jenkins-maven-nodejs"
   }
   environment {
     ORG = 'diracsystems'
@@ -19,7 +19,7 @@ pipeline {
         HELM_RELEASE = "$PREVIEW_NAMESPACE".toLowerCase()
       }
       steps {
-        container('maven') {
+        container('mavennodejs') {
           sh "mvn versions:set -DnewVersion=$PREVIEW_VERSION"
           sh "mvn install"
           sh "skaffold version"
@@ -37,7 +37,7 @@ pipeline {
         branch 'master'
       }
       steps {
-        container('maven') {
+        container('mavennodejs') {
 
           // ensure we're not on a detached head
           sh "git checkout master"
@@ -48,7 +48,9 @@ pipeline {
           sh "echo \$(jx-release-version) > VERSION"
           sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
           sh "jx step tag --version \$(cat VERSION)"
-          sh "mvn clean deploy"
+          sh "npm i -D sonar-scanner"
+          sh "mvn clean -Pprod test sonar:sonar -Dsonar.host.url=http://sonar-sonarqube:9000"
+          sh "mvn clean compile jib:exportDockerContext deploy"
           sh "skaffold version"
           sh "export VERSION=`cat VERSION` && skaffold build -f skaffold.yaml"
           sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
@@ -60,7 +62,7 @@ pipeline {
         branch 'master'
       }
       steps {
-        container('maven') {
+        container('mavennodejs') {
           dir('charts/jx-test-jhipster') {
             sh "jx step changelog --version v\$(cat ../../VERSION)"
 
