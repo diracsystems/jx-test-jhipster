@@ -50,7 +50,7 @@ pipeline {
           sh "jx step tag --version \$(cat VERSION)"
           //sh "npm i -D sonar-scanner"
           //sh "mvn clean -Pprod test sonar:sonar -Dsonar.host.url=http://sonar-sonarqube:9000"
-          sh "mvn clean compile jib:exportDockerContext deploy"
+          sh "mvn clean compile jib:dockerBuild deploy"
           sh "skaffold version"
           sh "export VERSION=`cat VERSION` && skaffold build -f skaffold.yaml"
           sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
